@@ -1,43 +1,149 @@
-# Bogotá Population Model-viewer: Project Plan
+# bogota-atlas: Project Plan
 
-## Parallel track: online viewer (separate repo)
+Written 2026-11-23. The atlas is a static map site that shows open data about Bogotá D.C. produced in other repos. It has no data pipeline of its own: it reads files that `bogota-pop` and `bogota-syntax` publish, and draws them without any code specific to a layer.
 
-The viewer lives in its own repo (working name `bogota-pop-viewer`) with its own environment, and treats the model repo as a data provider. It never imports the Python package; it only reads published, versioned files.
+## Purpose and scope
 
-**Data contract between the two repos.** The model repo's Phase 6 adds one more output per release: vector tiles of block and H3 results, built with tippecanoe into a single PMTiles file, plus a small JSON of UPZ/UPL summaries. The viewer pins a release tag (`v0.1`, `v1.0`) in its config, so a new model release never breaks the live site until the viewer is bumped on purpose.
+- One map for two producers:
+  - [gregmaya/bogota-pop](https://github.com/gregmaya/bogota-pop): resident population by block and H3 cell.
+  - [gregmaya/bogota-syntax](https://github.com/gregmaya/bogota-syntax): street-network centrality.
+- Two modes:
+  - **Public map:** pinned official releases.
+  - **Etapas:** intermediate pipeline layers, reached at `?etapas=1` and not linked from the site.
+- Spanish by default, English on a toggle. Every label, explanation and source switches language.
+- Desktop first, usable on a phone.
+- Out of scope: running models in the browser, user accounts, editing data, analytics that track people.
 
-**It can start early.** Once Phase 1 lands, the CNPV 2018 block layer is real, public data with the same geometry the model will publish. The viewer can be built against it while Phases 2–3 run, then switch to `v0.1` when it exists.
+## Decisions
 
-**Viewer decisions (closed 14 Nov 2026):**
+Decisions V1–V5 were closed in the `bogota-pop` plan on 2026-11-14. This repo restates them as ADRs and revises V3–V5.
 
-| #   | Decision               | Chosen                                                                                                                                                                           |
-| --- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| V1  | Stack                  | Static site: Vite + MapLibre GL JS + PMTiles                                                                                                                                     |
-| V2  | Where tiles are hosted | GitHub Pages in the viewer repo while the PMTiles file stays well under the 100 MB file limit; Cloudflare R2 if it grows. Range requests and CORS tested in the viewer's Phase 0 |
-| V3  | First version's scope  | Block choropleth, H3 toggle and UPZ panel for v0.1; year slider once two releases exist; scenarios after model Phase 5                                                           |
-| V4  | UI language            | Spanish only (the model repo's docs stay bilingual per D4)                                                                                                                       |
-| V5  | Domain                 | gregmaya.github.io/bogota-pop-viewer                                                                                                                                             |
+| ADR | Decision | Replaces |
+| --- | --- | --- |
+| [0001](decisions/0001-stack.md) | Vite + React + TypeScript + MapLibre GL JS + PMTiles; no router, small state | V1 |
+| [0002](decisions/0002-tile-hosting.md) | Producer files copied into the GitHub Pages build at deploy; size budget checked in CI; Cloudflare R2 if it's exceeded | V2 |
+| [0003](decisions/0003-v01-scope.md) | v0.1: layer panel by theme, inspect on click, swipe compare, ES/EN | V3 (revised) |
+| [0004](decisions/0004-languages.md) | Bilingual, Spanish default, language in the URL | V4 (superseded) |
+| [0005](decisions/0005-name-and-domain.md) | Repo `bogota-atlas`, site `gregmaya.github.io/bogota-atlas` | V5 (superseded) |
+| [0006](decisions/0006-reading-etapas.md) | How the atlas reads `etapas.json` from several producers, in release and local mode | Follow-up of `bogota-pop` ADR-0013 |
+| [0007](decisions/0007-basemap-sandwich.md) | Self-hosted Protomaps basemap split in two: base without labels below the data, labels in the active language above it | New |
+| [0008](decisions/0008-etapas-access.md) | Etapas is public but unlisted, behind `?etapas=1` | New |
 
-- [ ] Write V1–V5 as ADRs in the viewer repo
-- [ ] Add a PMTiles + summary JSON step to the model repo's Phase 6 checklist
-- [ ] Create the viewer repo empty alongside the model repo; start building once model Phase 1 ships the 2018 block layer
+The visual language is in [docs/style.md](style.md).
 
-### Etapas mode: every stage on the map
+## Architecture
 
-Each model stage writes its own PMTiles next to its regular output, so progress is reviewed on a map, not only in metrics. The viewer gets a second mode, "Etapas", with a layer switcher across them.
+```
+bogota-pop ──┐  GitHub Releases: <id>.pmtiles + etapas.json      ┌─ public map (pinned tags)
+             ├─────────────────────────────────────────────────►─┤
+bogota-syntax┘  dev-YYYY-MM-DD pre-releases for Etapas           └─ Etapas (?etapas=1, latest dev-*)
+                          │
+                          ▼
+        atlas deploy (GitHub Actions): download → validate → budget → build → Pages
+```
 
-| Stage layer                                      | Produced in | Level                              | Public            |
-| ------------------------------------------------ | ----------- | ---------------------------------- | ----------------- |
-| CNPV 2018 blocks as downloaded                   | Phase 1     | Block                              | Yes               |
-| Blocks anonymised by DANE (DATO_ANM)             | Phase 1     | Block                              | Yes               |
-| MGN↔cadastre match, unmatched blocks highlighted | Phase 2     | Block                              | Yes               |
-| Residential weight per lot                       | Phase 2     | Lot                                | No, local only    |
-| MVP estimate, 2026                               | Phase 2     | Lot (local), block and H3 (public) | Block and H3 only |
-| Housing-unit estimate, v1                        | Phase 3     | Lot (local), block and H3 (public) | Block and H3 only |
-| Back-cast residuals vs CNPV 2018                 | Phase 4     | Block                              | Yes               |
-| Scenario deltas                                  | Phase 5     | Block and H3                       | Yes               |
+- **Contract.** Layers are described by `etapas.json` as defined in `bogota-pop` ADR-0013, amended 2026-11-23 in [bogota-pop#13](https://github.com/gregmaya/bogota-pop/pull/13). bogota-syntax follows the same ADR by reference.
+- **Pinning.** `atlas.config.json` names a release tag for each producer, plus `"dev": "latest"` for Etapas. A new producer release changes nothing on the site until this file changes.
+- **Deploy.** For each producer, the workflow:
+  1. Downloads the release files into `public/data/<producer>/<tag>/`.
+  2. Validates `etapas.json` against `schema/etapas.schema.json`.
+  3. Rejects any layer with `public: false`.
+  4. Checks the size budget (ADR-0002).
+  5. Builds and deploys.
 
-- Development tiles ship as GitHub pre-releases tagged by date (`dev-2026-12-01`). Etapas follows the latest pre-release; the public map stays pinned to the official release.
-- Lot-level layers never leave your machine: run the viewer with `npm run dev` pointed at local tiles in `data/processed/`.
-- Every phase's exit gate includes reviewing its stage tiles in Etapas.
-- The viewer's first real milestone moves up to model Phase 1, with the 2018 and anonymised block layers.
+  Everything is served from the same origin, so CORS never comes up.
+- **Local mode.** `npm run dev:local` reads the full `etapas.json` files from `../bogota-pop/data/processed/etapas/` and `../bogota-syntax/data/processed/etapas/`, including private lot-level layers. The paths are set in a git-ignored `.env.local`. `npm run build` fails if they are set, so nothing read in local mode reaches `dist/`.
+- **Map stack.** From bottom to top:
+  1. Protomaps base with no labels.
+  2. Data layers in group order: `poblacion`, then `red_vial`.
+  3. The `context` group, which holds outlines such as the RENOBO pilot areas.
+  4. Protomaps labels in the active language.
+
+### Etapas layers expected (summary)
+
+The real lists are each producer's `config/etapas.yaml`. This table only shows what to expect.
+
+| Layer | Producer, phase | Level | Public |
+| --- | --- | --- | --- |
+| CNPV 2018 blocks as downloaded | bogota-pop, 1 | Block | Yes |
+| Blocks with dwellings but 0 persons (unexplained) | bogota-pop, 1 | Block | Yes |
+| MGN clase, UAECD blocks | bogota-pop, 1 | Block | Yes |
+| MGN↔cadastre match, unmatched blocks highlighted | bogota-pop, 2 | Block | Yes |
+| Residential weight per lot | bogota-pop, 2 | Lot | No, local only |
+| MVP estimate 2026; housing-unit estimate v1 | bogota-pop, 2–3 | Block and H3 (lot local only) | Block and H3 |
+| Back-cast residuals vs CNPV 2018 | bogota-pop, 4 | Block | Yes |
+| Pilot centrality (closeness, betweenness) with `boundary_dist_m` | bogota-syntax, pilot | Street segment | Yes |
+| RENOBO pilot areas, dashed | bogota-syntax, pilot | Polygon (Context) | Yes |
+
+## Phase 0: Bootstrap
+
+Goal: an empty but deployed site, with the hosting question answered by a real file.
+
+- [ ] Rename the repo to `bogota-atlas` (GitHub Settings) and update local clones
+- [ ] Merge this plan, `docs/style.md`, ADR-0001 to ADR-0008 and `CLAUDE.md`
+- [ ] Scaffold Vite + React + TypeScript with `base: '/bogota-atlas/'`; ESLint, Prettier, `tsc --noEmit`, Vitest; GitHub Actions for lint, typecheck, test and build
+- [ ] Self-host the fonts (Barlow, IBM Plex Mono) from `@fontsource` packages
+- [ ] Cut the Protomaps Bogotá extract with `pmtiles extract` (bounds in `atlas.config.json`) and deploy a blank map with the base + labels split working in ES and EN
+- [ ] Test on the deployed site that Pages answers PMTiles range requests (HTTP 206). The basemap extract is the test file
+- [ ] Write `schema/etapas.schema.json` from ADR-0013 and a fixture `etapas.json` with one layer per style kind, including a dashed outline
+
+**Exit gate:** the blank bilingual map is live at the Pages URL; range requests work; CI is green.
+
+## Phase 1: Generic Etapas
+
+Goal: any layer listed in an `etapas.json` appears on the map with no new code.
+
+- [ ] Load one or more `etapas.json` files, key layers as `producer/id`, sort them into groups
+- [ ] Draw the three style kinds (`sequential`, `categorical`, `outline` with `dash`), using the ramp that belongs to each group (style.md)
+- [ ] Layer panel by group, with visibility and opacity; legend generated from the style hint and `unit`
+- [ ] Information panel per layer: description, method, review text (Etapas only), sources, vigencia, licence, producer commit
+- [ ] Inspect panel on click: the fields kept in the tiles, with the unit and field name as published
+- [ ] ES/EN switch from two dictionaries (`src/i18n/es.json`, `en.json`); CI fails if their keys differ
+- [ ] URL state: view, layers, language, compare
+- [ ] Local mode against the producers' `data/processed/etapas/`
+
+**Exit gate:** every layer in the fixture renders and inspects in both languages; adding a layer to the fixture needs no code change.
+
+## Phase 2: Deploy from releases
+
+Goal: the site is built from real producer releases.
+
+- [ ] `atlas.config.json` with pinned tags and the dev channel
+- [ ] Deploy workflow: download, schema check, privacy check, size budget, build. It runs on push to `main`, on manual dispatch, and on a schedule to pick up new `dev-*` pre-releases
+- [ ] First real layers: bogota-pop Phase 1 (MGN 2018 blocks, MGN clase, UAECD blocks) and the bogota-syntax pilot centrality, as they publish
+- [ ] Attribution line built from the visible layers' `attribution` plus OpenStreetMap for the basemap
+
+**Exit gate:** a new `dev-*` pre-release from either producer appears in Etapas without a commit here.
+
+## Phase 3: Compare and mobile
+
+- [ ] Swipe compare with two synced maps (`@maplibre/maplibre-gl-compare` or a small hand-written equivalent); desktop only
+- [ ] Bottom-sheet layout below the mobile breakpoint
+- [ ] Accessibility pass: keyboard focus, contrast of panels over the map, `prefers-reduced-motion`
+
+**Exit gate:** 2018 blocks against a second layer works by swipe; the site is usable on a phone in both languages.
+
+## Phase 4: Public v0.1
+
+Tied to `bogota-pop` release `v0.1` (MVP model).
+
+- [ ] Public map mode pinned to `v0.1` and the first bogota-syntax release
+- [ ] Block choropleth with H3 toggle and UPZ/UPL panel (V3), reading the summary JSON
+- [ ] About page in both languages: what each producer does, how to cite, licences (CC BY 4.0 for bogota-pop outputs, ODbL for bogota-syntax outputs, ODbL for the OpenStreetMap basemap)
+
+**Exit gate:** the public map is linked from both producer READMEs.
+
+## Later
+
+- Charts in panels with Observable Plot, wrapped in one React component. Each panel keeps a slot for one, so nothing needs reworking later.
+- Year slider once two population releases exist; scenario layers after `bogota-pop` Phase 5.
+- Map labels in Barlow, which would need glyph files generated for MapLibre. Labels use the Protomaps Noto Sans glyphs until then.
+
+## Risks
+
+| Risk | Mitigation |
+| --- | --- |
+| Pages limits: 100 MB per file, about 1 GB per site | Budget check fails the deploy before the limit; R2 fallback in ADR-0002 |
+| Many Etapas layers from two producers fill the budget | Etapas carries only the latest `dev-*` of each producer; old ones are not kept |
+| Contract changes in a producer break the site | `schema_version` checked at deploy; a mismatch fails the build, the live site stays as it was |
+| A private layer leaks into a release | Producers check in code (ADR-0013 rule 4); the atlas checks again at deploy |

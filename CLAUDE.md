@@ -1,56 +1,74 @@
-# CLAUDE.md — bogota-pop-viewer
+# CLAUDE.md — bogota-atlas
 
-Static web map of Bogotá's modelled population, built on the data published by `gregmaya/bogota-pop`. Live at `https://gregmaya.github.io/bogota-pop-viewer/`.
+Static, bilingual map site for Bogotá D.C. It draws layers published by `bogota-pop` (population) and `bogota-syntax` (street-network centrality). It has no data pipeline of its own.
 
-The plan for this repo is in `docs/plan.md` (the "Parallel track: online viewer" section of the model plan). Decisions V1–V5 live in `docs/decisions/` as ADRs.
+The plan is `docs/plan.md`, the visual language is `docs/style.md`, and decisions are ADRs in `docs/decisions/`. Read all three before starting a phase or changing anything structural.
 
 ## Current status
 
-- Phase: **waiting on model Phase 1** (update this line as work starts)
-- First milestone: blank map deployed, then the CNPV 2018 block layer served as PMTiles from GitHub Pages
+- Phase: **0, Bootstrap** (update this line when a phase closes). Specs written 2026-11-23; no app code yet.
+- The layer contract is `bogota-pop` ADR-0013, amended in gregmaya/bogota-pop#13.
 
 ## Stack
 
-- Vite + MapLibre GL JS + PMTiles (ADR V1). Plain JavaScript or TypeScript, decided at scaffold time, then noted here.
-- No backend, no database, no server code. Everything is static and deployable to GitHub Pages.
-- Tiles built with tippecanoe in the model repo, not here.
+- Vite + React + TypeScript, MapLibre GL JS, `pmtiles` (ADR-0001). npm, with the Node version in `.nvmrc`.
+- No router, no UI kit, no i18n library, no global state library unless agreed. Plain CSS with the custom properties in `docs/style.md`.
+- Basemap: self-hosted Protomaps extract, split into base and labels around the data (ADR-0007).
+- Fonts: Barlow (interface) and IBM Plex Mono (numbers, codes, field names), self-hosted from `@fontsource`.
 
 ## Commands
 
 ```bash
-npm install
-npm run dev        # local dev server
-npm run build      # production build into dist/
-npm run preview    # serve the build locally
+npm ci                 # install from package-lock.json
+npm run dev            # dev server against the fixture etapas.json
+npm run dev:local      # dev server against the producers' data/processed/etapas/ (paths in git-ignored .env.local; private layers allowed)
+npm run lint && npm run typecheck && npm test
+npm run build          # production build; never run in local mode
+npm run fetch-data     # download pinned producer files into public/data/ (what the deploy workflow runs)
 ```
 
-Update this block when scripts change.
+Update this block when the real commands differ.
 
-## Data contract with bogota-pop
+## Layout
 
-1. **The viewer only reads published files.** PMTiles and the UPZ/UPL summary JSON attached to a bogota-pop Release. It never imports or calls the Python package.
-2. **The public map is pinned to one release tag** in `src/config` (for example `v0.1`). A new model release never changes the live site until the tag is bumped on purpose in a PR.
-3. **Etapas mode** follows the latest dev pre-release (`dev-YYYY-MM-DD`) and shows one layer per model stage. It must say clearly that the layers are work in progress.
-4. **No lot-level data, ever, in this repo or on the live site.** Lot-level stage tiles are viewed only by running `npm run dev` against local files in `../bogota-pop/data/processed/`. That path is configured through a git-ignored `.env.local`, and nothing from it gets committed or built into `dist/`.
+- `atlas.config.json`: producers, pinned tags, dev channel, basemap bounds and build date.
+- `schema/etapas.schema.json`: mirror of `bogota-pop` ADR-0013; checked at deploy.
+- `src/map/`: map creation, layer generation from the style hint, basemap split.
+- `src/panels/`: layer, legend, inspect, information panels.
+- `src/i18n/es.json`, `src/i18n/en.json`: interface text.
+- `public/data/`: git-ignored; filled by `fetch-data`.
+- `tests/fixtures/etapas.json`: one layer per style kind, both languages.
 
-## Hosting
+## Hard rules
 
-- GitHub Pages, with `base: '/bogota-pop-viewer/'` in the Vite config.
-- PMTiles served from Pages while each file stays well under Pages' 100 MB file limit. If a file approaches it, or range requests or CORS fail, move tiles to Cloudflare R2 (ADR V2) and record the change here.
-- No API keys or tokens in the repo. Basemap must be keyless or use a public style.
+1. **No layer-specific code.** Layers are drawn from `etapas.json` and the style hint only. A new `style.kind` is agreed with the producers first.
+2. **Private layers never deploy.** A layer with `public: false` fails the build, and `npm run build` fails if the local paths in `.env.local` are set. No lot-level data is ever committed here.
+3. **Every interface string exists in both `es.json` and `en.json`.** CI checks the keys match. Spanish is the default.
+4. **Data stays as published.** Field names and codes (`TP27_PERSO`, `boundary_dist_m`) are shown untranslated, in Plex Mono.
+5. **Missing data is never shown as zero.** It is hatched and explained in the legend (`docs/style.md`). Blocks with dwellings but 0 persons are not "anonymised": `DATO_ANM` is the publication level, `MANZANA` for every Bogotá block.
+6. **No invented numbers.** Every figure shown comes from a producer file. If something isn't computed yet, the UI says so.
+7. **Producer files are read-only here.** A change they need becomes a cross-linked issue in that repo.
+8. **Size budget:** no file over 90 MB, site under 800 MB (ADR-0002).
+9. **Colour:** interface colours and data ramps never overlap; `#FFCC00` only marks what the user selected (`docs/style.md`).
 
-## UI conventions
+## Conventions
 
-- **Interface in Spanish only** (ADR V4). Code, comments, commit messages and issues in English.
-- v0.1 scope: block choropleth, H3 toggle, UPZ panel. Year slider only once two releases exist. Scenarios only after model Phase 5. Don't add features beyond the current scope without asking.
-- Colour: one sequential palette for population density, colour-blind safe, with a legend that states units (personas, personas/ha) and the data release and year.
-- Every map view shows its source and licence: "Datos: bogota-pop vX.Y (CC BY 4.0), basado en DANE, UAECD y SDP".
-- Anonymised blocks (DANE DATO_ANM) are drawn distinctly (hatched or outlined) and explained in the legend, never shown as zero.
-- Works on mobile first. Keep the JS bundle small; avoid heavy UI frameworks unless agreed.
+- Code, comments, commits and ADRs in English. Issues, PRs and release notes in English and Spanish, titles as `English · Español`. README bilingual (`README.md`, `README.es.md`).
+- Spell out acronyms the first time, using the producers' glossaries; never guess one.
+- TypeScript strict mode. Components small; one CSS module per component.
 
-## How to work with me (Greg)
+## How to work with me (Gregorio)
 
-- Talk a decision through before writing code for it. If something isn't in the plan or an ADR, propose it and wait.
-- Stop after each step for review.
-- Small PRs, one per task.
-- When the model repo's published file names or schemas change, update the data loading code and note the release tag it targets.
+- Talk a decision through before writing code for it. Propose, then wait.
+- Stop after each step for review. Small PRs, one per task. End each step with a short progress table: ✅ done / 🟡 in progress (say what's missing) / ⏭️ skipped / ⬜ not started.
+- Don't commit or push unless asked. Anything public on GitHub (issues, labels, releases, Pages settings) needs a go-ahead first.
+- Explain unfamiliar things simply, with a recommendation. Docs in easy language.
+- A new structural decision becomes a new ADR (copy `docs/decisions/template.md`, list it in `docs/decisions/README.md`).
+- Prose in docs and UI: direct, specific, varied sentence length, no filler intros or recap endings.
+
+## Companion repos
+
+- `gregmaya/bogota-pop` (`../bogota-pop`): population model. Owns ADR-0013.
+- `gregmaya/bogota-syntax` (`../bogota-syntax`): street-network centrality. Follows ADR-0013 by reference.
+- **One session per repo.** A session here never edits the producer repos. A need from them becomes a note to Greg, drafted so he can take it there.
+- Kickoff prompt for a new session here: `docs/kickoff.md`.
