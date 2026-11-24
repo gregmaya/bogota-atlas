@@ -16,7 +16,8 @@
     "test": "vitest run",
     "fetch-data": "node scripts/fetch-data.mjs",
     "fetch-data:local": "node scripts/fetch-data.mjs --local",
-    "check-budget": "node scripts/check-budget.mjs"
+    "check-budget": "node scripts/check-budget.mjs",
+    "check-etapas": "node scripts/check-etapas.ts"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",
@@ -32,6 +33,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
+    "ajv": "^8.20.0",
     "oxlint": "^1.95.0",
     "prettier": "^3.10.1",
     "typescript": "~7.0.2",

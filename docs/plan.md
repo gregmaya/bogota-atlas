@@ -79,15 +79,17 @@ The real lists are each producer's `config/etapas.yaml`. This table only shows w
 
 Goal: an empty but deployed site, with the hosting question answered by a real file.
 
-- [ ] Rename the repo to `bogota-atlas` (GitHub Settings) and update local clones
-- [ ] Merge this plan, `docs/style.md`, ADR-0001 to ADR-0008 and `CLAUDE.md`
-- [ ] Scaffold Vite + React + TypeScript with `base: '/bogota-atlas/'`; ESLint, Prettier, `tsc --noEmit`, Vitest; GitHub Actions for lint, typecheck, test and build
-- [ ] Self-host the fonts (Barlow, IBM Plex Mono) from `@fontsource` packages
-- [ ] Cut the Protomaps Bogotá extract with `pmtiles extract` (bounds in `atlas.config.json`) and deploy a blank map with the base + labels split working in ES and EN
-- [ ] Test on the deployed site that Pages answers PMTiles range requests (HTTP 206). The basemap extract is the test file
-- [ ] Write `schema/etapas.schema.json` from ADR-0013 and a fixture `etapas.json` with one layer per style kind, including a dashed outline
+- [x] Rename the repo to `bogota-atlas` (GitHub Settings) and update local clones
+- [x] Merge this plan, `docs/style.md`, ADR-0001 to ADR-0008 and `CLAUDE.md`
+- [x] Scaffold Vite + React + TypeScript with `base: '/bogota-atlas/'`; oxlint (ADR-0009), Prettier, `tsc -b`, Vitest; GitHub Actions for lint, typecheck, test and build
+- [x] Self-host the fonts (Barlow, IBM Plex Mono) from `@fontsource` packages
+- [x] Cut the Protomaps Bogotá extract with `pmtiles extract` (bounds in `atlas.config.json`) and deploy a blank map with the base + labels split working in ES and EN
+- [x] Test on the deployed site that Pages answers PMTiles range requests (HTTP 206). The basemap extract is the test file
+- [x] Write `schema/etapas.schema.json` from ADR-0013 and a fixture `etapas.json` with one layer per style kind, including a dashed outline
 
 **Exit gate:** the blank bilingual map is live at the Pages URL; range requests work; CI is green.
+
+Closed 2026-11-23. The schema fills gaps in ADR-0013 that bogota-pop still has to agree to: see [contract-notes.md](contract-notes.md).
 
 ## Phase 1: Generic Etapas
 

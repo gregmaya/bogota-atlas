@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "producer": "bogota-pop",
+  "created": "2026-11-23T21:20:00Z",
+  "commit": "1df5855",
+  "layers": [
+    {
+      "id": "mgn_2018_manzanas",
+      "title": {
+        "es": "Manzanas CNPV 2018 (muestra)",
+        "en": "CNPV 2018 blocks (sample)"
+      },
+      "description": {
+        "es": "Personas censadas por manzana en el CNPV 2018, tal como las publica el DANE. Muestra del centro de Bogotá para probar el atlas.",
+        "en": "People counted per block in the CNPV 2018, as DANE publishes them. A sample of central Bogotá for testing the atlas."
+      },
+      "method": {
+        "es": "Sin ajustar. Las manzanas con viviendas pero 0 personas aún no tienen explicación; no son manzanas anonimizadas.",
+        "en": "Unadjusted. Blocks with dwellings but 0 persons have no explanation yet; they are not anonymised blocks."
+      },
+      "review": {
+        "es": "¿Coinciden las manzanas con el mapa base?",
+        "en": "Do the blocks line up with the basemap?"
+      },
+      "group": "poblacion",
+      "stage": "ingest",
+      "sources": ["dane_mgn_cnpv2018_manzana"],
+      "input": "data/interim/dane_mgn_cnpv2018_manzana/2018.parquet",
+      "level": "manzana",
+      "public": true,
+      "fields": ["COD_DANE_A", "TP27_PERSO", "TVIVIENDA"],
+      "style": { "field": "TP27_PERSO", "kind": "sequential" },
+      "unit": { "es": "personas", "en": "people" },
+      "minzoom": 12,
+      "maxzoom": 16,
+      "file": "mgn_2018_manzanas.pmtiles",
+      "geometry": "polygon",
+      "field_types": { "COD_DANE_A": "string", "TP27_PERSO": "number", "TVIVIENDA": "number" },
+      "bounds": [-74.09, 4.585, -74.065, 4.625],
+      "vigencia": { "dane_mgn_cnpv2018_manzana": "2018" },
+      "attribution": "Fuente: Departamento Administrativo Nacional de Estadística: www.dane.gov.co"
+    }
+  ]
+}
