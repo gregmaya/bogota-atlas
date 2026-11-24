@@ -147,3 +147,7 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local tools (pmtiles CLI) and fetched data
+.tools/
+public/data/

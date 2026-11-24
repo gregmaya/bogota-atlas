@@ -1,6 +1,6 @@
 # ADR-0008: Etapas: public but unlisted
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-23
 - **Plan reference:** Purpose and scope in [docs/plan.md](../plan.md)
 

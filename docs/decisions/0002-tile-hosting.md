@@ -1,6 +1,6 @@
 # ADR-0002: Tile hosting: copied into GitHub Pages at deploy
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-23
 - **Plan reference:** Architecture in [docs/plan.md](../plan.md)
 
