@@ -13,3 +13,4 @@ One short file per decision. ADRs are immutable once accepted; a change is a new
 | [0007](0007-basemap-sandwich.md) | Basemap: Protomaps, split around the data | Accepted | 2026-11-23 |
 | [0008](0008-etapas-access.md) | Etapas: public but unlisted | Accepted | 2026-11-23 |
 | [0009](0009-oxlint.md) | Linter: oxlint instead of ESLint (amends 0001) | Accepted | 2026-11-23 |
+| [0010](0010-basemap-white-flavour.md) | Basemap flavour: Protomaps white (amends 0007) | Accepted | 2026-11-23 |

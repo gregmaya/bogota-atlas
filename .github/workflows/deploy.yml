@@ -1,0 +1,66 @@
+# Build the site with its data and publish it to GitHub Pages (ADR-0002).
+# Needs Settings → Pages → Source set to "GitHub Actions".
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; a newer push replaces a queued one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run fetch-data
+      - run: npm run build
+      - run: npm run check-budget
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+  # PMTiles needs HTTP range requests (ADR-0002). Ask the live site for the
+  # first 512 bytes of the basemap and expect 206 Partial Content.
+  range-check:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Range request on the basemap
+        run: |
+          release=$(jq -r .basemap.release atlas.config.json)
+          url="https://gregmaya.github.io/bogota-atlas/data/basemap/$release/basemap.pmtiles"
+          for attempt in 1 2 3 4 5 6; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -r 0-511 "$url")
+            echo "Attempt $attempt: HTTP $code for $url"
+            [ "$code" = 206 ] && exit 0
+            sleep 20
+          done
+          echo "::error::Pages did not answer a range request with 206"
+          exit 1

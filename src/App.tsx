@@ -1,5 +1,17 @@
-// Placeholder shell. The map arrives in Phase 0 step 3; interface text
-// arrives with the i18n dictionaries, so nothing here is user-facing yet.
+import { useEffect } from 'react'
+import { langFromSearch } from './map/basemap.ts'
+import { MapView } from './map/MapView.tsx'
+
+// Language comes from the URL only for now (?lang=en); the visible ES·EN
+// switch arrives with the dictionaries in Phase 1.
 export function App() {
-  return <main />
+  const lang = langFromSearch(window.location.search)
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
+  return (
+    <main>
+      <MapView lang={lang} />
+    </main>
+  )
 }

@@ -151,3 +151,4 @@ vite.config.ts.timestamp-*
 # Local tools (pmtiles CLI) and fetched data
 .tools/
 public/data/
+build/

@@ -1,0 +1,12 @@
+{
+  "basemap": {
+    "release": "basemap-2026-11-23",
+    "buildDate": "2026-11-23",
+    "source": "https://build.protomaps.com/20261123.pmtiles",
+    "bounds": [-74.313757, 4.37101, -73.910535, 4.923541],
+    "maxzoom": 15,
+    "assetsCommit": "028c18f713baecad011301ff7a69acc39bcc2ae7",
+    "files": ["basemap.pmtiles", "basemap-assets.tar.gz"],
+    "flavor": "white"
+  }
+}
