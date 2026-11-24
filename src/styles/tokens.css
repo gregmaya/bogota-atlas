@@ -1,0 +1,46 @@
+/*
+ * Design tokens from docs/style.md. Change them there first, then here.
+ * Interface colours only: data ramps belong to the layer groups and are
+ * generated from the style hint (Phase 1), never from these tokens.
+ */
+:root {
+  /* Colour */
+  --ink: #454647; /* never pure black */
+  --ink-muted: rgb(69 70 71 / 70%);
+  --paper: #ffffff;
+  --panel: rgb(229 237 241 / 85%);
+  --panel-solid: rgb(229 237 241 / 95%); /* no backdrop-filter support */
+  --line: #96c2db;
+  --accent: #ffcc00; /* only "this is what you picked" */
+
+  /* Type */
+  --font-sans: 'Barlow', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --text-xs: 13px;
+  --text-sm: 15px; /* body */
+  --text-md: 18px; /* panel titles, weight 600 */
+  --text-lg: 24px; /* site title */
+  --text-xl: 32px;
+  --text-label: 12px; /* uppercase group headers */
+  --tracking-label: 0.06em;
+
+  /* Panels */
+  --radius: 0;
+  --panel-blur: blur(12px);
+  --panel-shadow: 0 8px 24px rgb(0 0 0 / 10%);
+  --panel-padding: 16px;
+  --panel-gap: 12px;
+  --panel-inset: 16px; /* distance from the viewport edge */
+
+  /* Breakpoints (for reference; CSS custom properties can't be used in media queries) */
+  /* desktop >= 1024px, phone < 768px */
+
+  /* Motion */
+  --motion-panel: 150ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-panel: 0s;
+  }
+}

@@ -68,7 +68,7 @@ Phone (< 768 px): the map takes the full screen and a single bottom sheet holds 
 
 ## Map
 
-- Basemap: Protomaps light flavour, desaturated further so it sits behind the data. Order: base without labels, data, Context, then labels in the active language (ADR-0007).
+- Basemap: Protomaps white flavour (ADR-0010), so it sits behind the data. Order: base without labels, data, Context, then labels in the active language (ADR-0007).
 - Labels keep a halo in `--paper` so they stay readable over dark classes.
 - The selected feature gets a 2 px `--accent` outline.
 

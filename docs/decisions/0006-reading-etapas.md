@@ -1,6 +1,6 @@
 # ADR-0006: Reading etapas.json from several producers
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-23
 - **Plan reference:** Architecture in [docs/plan.md](../plan.md)
 

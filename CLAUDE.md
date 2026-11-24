@@ -24,8 +24,13 @@ npm run dev            # dev server against the fixture etapas.json
 npm run dev:local      # dev server against the producers' data/processed/etapas/ (paths in git-ignored .env.local; private layers allowed)
 npm run lint && npm run typecheck && npm test
 npm run build          # production build; never run in local mode
-npm run fetch-data     # download pinned producer files into public/data/ (what the deploy workflow runs)
+npm run fetch-data     # download pinned release files into public/data/ (what the deploy workflow runs; basemap only until Phase 2)
+npm run fetch-data:local  # same, from build/basemap/ after scripts/build-basemap.sh
+npm run check-budget   # size budget on dist/ (ADR-0002)
+scripts/build-basemap.sh  # rebuild the basemap release files by hand (docs/basemap.md)
 ```
+
+`dev:local` and the fixture arrive in later steps. Node comes from `.nvmrc` (fnm switches to it).
 
 Update this block when the real commands differ.
 

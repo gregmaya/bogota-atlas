@@ -1,6 +1,6 @@
 # ADR-0001: Stack: Vite, React, TypeScript, MapLibre GL JS, PMTiles
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-23
 - **Plan reference:** Decisions, Phase 0 in [docs/plan.md](../plan.md)
 
