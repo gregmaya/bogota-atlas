@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "producer": "bogota-syntax",
+  "created": "2026-11-23T21:20:00Z",
+  "commit": "91e0f41",
+  "layers": [
+    {
+      "id": "centralidad_armonica_800",
+      "title": {
+        "es": "Cercanía armónica angular, 800 m (muestra)",
+        "en": "Angular harmonic closeness, 800 m (sample)"
+      },
+      "description": {
+        "es": "Cercanía de cada segmento de vía a los demás dentro de 800 m, por la ruta más simple. Muestra del centro de Bogotá para probar el atlas.",
+        "en": "How close each street segment is to the others within 800 m, by the simplest route. A sample of central Bogotá for testing the atlas."
+      },
+      "method": {
+        "es": "Ruta más simple (costo angular) en el grafo dual, sin dirección ni pesos. La red se corta en el límite de la ciudad; boundary_dist_m da la distancia al borde.",
+        "en": "Simplest route (angular cost) on the dual graph, undirected and unweighted. The network stops at the city limit; boundary_dist_m gives the distance to that edge."
+      },
+      "review": {
+        "es": "¿Los valores bajan cerca del límite de la ciudad?",
+        "en": "Do values drop near the city limit?"
+      },
+      "group": "red_vial",
+      "stage": "centrality",
+      "sources": ["ideca_malla_vial"],
+      "input": "data/processed/centrality_city.parquet",
+      "level": "segmento",
+      "public": true,
+      "fields": ["segment_id", "cc_harmonic_800_ang", "boundary_dist_m"],
+      "style": { "field": "cc_harmonic_800_ang", "kind": "sequential" },
+      "unit": { "es": "índice, sin unidad", "en": "index, no unit" },
+      "minzoom": 12,
+      "maxzoom": 16,
+      "file": "centralidad_armonica_800.pmtiles",
+      "geometry": "line",
+      "field_types": {
+        "segment_id": "string",
+        "cc_harmonic_800_ang": "number",
+        "boundary_dist_m": "number"
+      },
+      "bounds": [-74.09, 4.585, -74.065, 4.625],
+      "vigencia": { "ideca_malla_vial": null },
+      "attribution": "IDECA / UAECD, Mapa de Referencia, Malla Vial Integral (CC BY 4.0)"
+    },
+    {
+      "id": "tipo_via",
+      "title": {
+        "es": "Tipo de vía, MVITIPO (muestra)",
+        "en": "Street type, MVITIPO (sample)"
+      },
+      "description": {
+        "es": "Tipo de cada segmento de vía según la Malla Vial Integral, con los códigos tal como se publican.",
+        "en": "Type of each street segment in the Malla Vial Integral, with codes as published."
+      },
+      "method": {
+        "es": "Atributo MVITIPO sin cambios. Los segmentos sin código quedan sin dato.",
+        "en": "The MVITIPO attribute, unchanged. Segments with no code have no data."
+      },
+      "review": {
+        "es": "¿Hay muchos segmentos sin código?",
+        "en": "Are many segments missing a code?"
+      },
+      "group": "red_vial",
+      "stage": "centrality",
+      "sources": ["ideca_malla_vial"],
+      "input": "data/processed/centrality_city.parquet",
+      "level": "segmento",
+      "public": true,
+      "fields": ["segment_id", "MVITIPO"],
+      "style": { "field": "MVITIPO", "kind": "categorical" },
+      "unit": { "es": "código MVITIPO", "en": "MVITIPO code" },
+      "minzoom": 12,
+      "maxzoom": 16,
+      "file": "tipo_via.pmtiles",
+      "geometry": "line",
+      "field_types": { "segment_id": "string", "MVITIPO": "string" },
+      "bounds": [-74.09, 4.585, -74.065, 4.625],
+      "vigencia": { "ideca_malla_vial": null },
+      "attribution": "IDECA / UAECD, Mapa de Referencia, Malla Vial Integral (CC BY 4.0)"
+    },
+    {
+      "id": "renobo_piloto",
+      "title": {
+        "es": "Áreas piloto RENOBO (muestra)",
+        "en": "RENOBO pilot areas (sample)"
+      },
+      "description": {
+        "es": "Polígonos de proyectos de RENOBO que delimitan el piloto del análisis de red vial.",
+        "en": "RENOBO project polygons that bound the street-network analysis pilot."
+      },
+      "method": {
+        "es": "Selección de polígonos de RENOBO por GmlID. Solo contorno, como contexto.",
+        "en": "RENOBO polygons selected by GmlID. Outline only, as context."
+      },
+      "review": {
+        "es": "¿Los contornos caen sobre las manzanas esperadas?",
+        "en": "Do the outlines fall on the expected blocks?"
+      },
+      "group": "context",
+      "stage": "ingest",
+      "sources": ["renobo_proyectos"],
+      "input": "data/renobo_selection.gpkg",
+      "level": "area",
+      "public": true,
+      "fields": ["GmlID", "Nombre_de_Proyecto"],
+      "style": { "field": "GmlID", "kind": "outline", "dash": true },
+      "minzoom": 12,
+      "maxzoom": 16,
+      "file": "renobo_piloto.pmtiles",
+      "geometry": "polygon",
+      "field_types": { "GmlID": "string", "Nombre_de_Proyecto": "string" },
+      "bounds": [-74.09, 4.5874703, -74.065, 4.625],
+      "vigencia": { "renobo_proyectos": null },
+      "attribution": "RENOBO, Proyecto de RenoBo (CC BY 4.0)"
+    }
+  ]
+}

@@ -6,7 +6,8 @@ The plan is `docs/plan.md`, the visual language is `docs/style.md`, and decision
 
 ## Current status
 
-- Phase: **0, Bootstrap** (update this line when a phase closes). Specs written 2026-11-23; no app code yet.
+- Phase: **1, Generic Etapas** (update this line when a phase closes). Phase 0 closed 2026-11-23: blank bilingual map live, range requests work, schema and fixture in place.
+- Open with bogota-pop: the schema's additions to ADR-0013 in `docs/contract-notes.md`.
 - The layer contract is `bogota-pop` ADR-0013, amended in gregmaya/bogota-pop#13.
 
 ## Stack
@@ -27,6 +28,7 @@ npm run build          # production build; never run in local mode
 npm run fetch-data     # download pinned release files into public/data/ (what the deploy workflow runs; basemap only until Phase 2)
 npm run fetch-data:local  # same, from build/basemap/ after scripts/build-basemap.sh
 npm run check-budget   # size budget on dist/ (ADR-0002)
+npm run check-etapas -- <etapas.json>...  # validate against the schema (add --release to reject private layers)
 scripts/build-basemap.sh  # rebuild the basemap release files by hand (docs/basemap.md)
 ```
 
@@ -42,7 +44,8 @@ Update this block when the real commands differ.
 - `src/panels/`: layer, legend, inspect, information panels.
 - `src/i18n/es.json`, `src/i18n/en.json`: interface text.
 - `public/data/`: git-ignored; filled by `fetch-data`.
-- `tests/fixtures/etapas.json`: one layer per style kind, both languages.
+- `tests/fixtures/<producer>/`: fixture `etapas.json` and small real PMTiles per producer, one layer per style kind, both languages. Cut by `scripts/build-fixture.sh`.
+- `scripts/check-etapas.ts`: schema plus cross-field checks; `--release` also rejects private layers.
 
 ## Hard rules
 
