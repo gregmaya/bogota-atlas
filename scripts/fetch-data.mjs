@@ -82,6 +82,13 @@ for (const producer of existsSync(data) ? readdirSync(data) : []) {
   for (const leftover of ['fixture', 'local']) {
     if (leftover !== mode) rmSync(join(data, producer, leftover), { recursive: true, force: true })
   }
+  // Tags no longer pinned (e.g. an older dev-*) would otherwise ship with the next build.
+  if (mode === 'release') {
+    const pinned = Object.values(config.producers?.[producer] ?? {}).filter(Boolean)
+    for (const tag of readdirSync(join(data, producer))) {
+      if (!pinned.includes(tag)) rmSync(join(data, producer, tag), { recursive: true, force: true })
+    }
+  }
 }
 const index = []
 
