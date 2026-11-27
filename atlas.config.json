@@ -8,5 +8,15 @@
     "assetsCommit": "028c18f713baecad011301ff7a69acc39bcc2ae7",
     "files": ["basemap.pmtiles", "basemap-assets.tar.gz"],
     "flavor": "white"
+  },
+  "producers": {
+    "bogota-pop": {
+      "release": null,
+      "dev": null
+    },
+    "bogota-syntax": {
+      "release": null,
+      "dev": "dev-2026-11-26"
+    }
   }
 }

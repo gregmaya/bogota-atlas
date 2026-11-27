@@ -1,0 +1,12 @@
+{
+  "layers.title": "Layers",
+  "layers.loading": "Loading layers…",
+  "layers.empty": "No layers published yet.",
+  "layers.error": "The layers could not be loaded.",
+  "layers.opacity": "Opacity",
+  "group.poblacion": "Population",
+  "group.red_vial": "Spatial network",
+  "group.context": "Context",
+  "etapas.badge": "Etapas: work in progress",
+  "map.labels": "Map labels"
+}
