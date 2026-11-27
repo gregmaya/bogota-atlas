@@ -1,0 +1,12 @@
+{
+  "layers.title": "Capas",
+  "layers.loading": "Cargando capas…",
+  "layers.empty": "No hay capas publicadas todavía.",
+  "layers.error": "No se pudieron cargar las capas.",
+  "layers.opacity": "Opacidad",
+  "group.poblacion": "Población",
+  "group.red_vial": "Red espacial",
+  "group.context": "Contexto",
+  "etapas.badge": "Etapas: trabajo en curso",
+  "map.labels": "Nombres en el mapa"
+}

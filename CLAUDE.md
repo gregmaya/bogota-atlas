@@ -21,26 +21,28 @@ The plan is `docs/plan.md`, the visual language is `docs/style.md`, and decision
 
 ```bash
 npm ci                 # install from package-lock.json
-npm run dev            # dev server against the fixture etapas.json
-npm run dev:local      # dev server against the producers' data/processed/etapas/ (paths in git-ignored .env.local; private layers allowed)
+npm run dev            # dev server with the fixture layers (open with ?etapas=1)
+npm run dev:local      # dev server with the producers' data/processed/etapas/ (folders in git-ignored .env.local, see .env.local.example; private layers allowed)
+npm run dev:release    # dev server with the pinned release and dev tags, as deployed
 npm run lint && npm run typecheck && npm test
-npm run build          # production build; never run in local mode
-npm run fetch-data     # download pinned release files into public/data/ (what the deploy workflow runs; basemap only until Phase 2)
-npm run fetch-data:local  # same, from build/basemap/ after scripts/build-basemap.sh
+npm run build          # production build; stops if .env.local sets producer folders or public/data holds local/fixture files
+npm run fetch-data     # download the basemap and pinned producer tags into public/data/ (what the deploy runs)
+npm run fetch-data:local  # basemap from build/basemap/ after scripts/build-basemap.sh
 npm run check-budget   # size budget on dist/ (ADR-0002)
 npm run check-etapas -- <etapas.json>...  # validate against the schema (add --release to reject private layers)
 scripts/build-basemap.sh  # rebuild the basemap release files by hand (docs/basemap.md)
 ```
 
-`dev:local` and the fixture arrive in later steps. Node comes from `.nvmrc` (fnm switches to it).
+Vite lists `public/` when it starts: after changing mode, restart the dev server (the `dev*` scripts do). Node comes from `.nvmrc` (fnm switches to it).
 
 Update this block when the real commands differ.
 
 ## Layout
 
-- `atlas.config.json`: producers, pinned tags, dev channel, basemap bounds and build date.
+- `atlas.config.json`: basemap release, bounds and flavour; per producer a pinned `release` tag (public map) and `dev` tag (Etapas, `?etapas=1`).
 - `schema/etapas.schema.json`: mirror of `bogota-pop` ADR-0013; checked at deploy.
-- `src/map/`: map creation, layer generation from the style hint, basemap split.
+- `src/etapas/`: loading `etapas.json`, layer generation from the style hint, colour ramps.
+- `src/map/`: map creation, basemap split, adding etapas layers.
 - `src/panels/`: layer, legend, inspect, information panels.
 - `src/i18n/es.json`, `src/i18n/en.json`: interface text.
 - `public/data/`: git-ignored; filled by `fetch-data`.

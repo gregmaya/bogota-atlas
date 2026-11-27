@@ -33,6 +33,10 @@ cut bogota-syntax centralidad_armonica_800 \
   "$SYNTAX/data/processed/centrality_city.parquet" 12 16 \
   -select segment_id,cc_harmonic_800_ang,boundary_dist_m
 
+cut bogota-syntax centralidad_armonica_2000 \
+  "$SYNTAX/data/processed/centrality_city.parquet" 12 16 \
+  -select segment_id,cc_harmonic_2000_ang,boundary_dist_m
+
 cut bogota-syntax tipo_via \
   "$SYNTAX/data/processed/centrality_city.parquet" 12 16 \
   -select segment_id,MVITIPO

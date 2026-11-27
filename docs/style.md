@@ -1,6 +1,6 @@
 # Style
 
-The atlas should feel robust, trustworthy, technically thorough and serious. In practice that means a calm basemap, square panels floating over the map, two typefaces with clear jobs, and data colours kept apart from interface colours. The reference is the Blue Lagoon website: a DIN-style sans, charcoal text instead of black, square corners, soft wide shadows and a pale blue-grey.
+The atlas should feel robust, trustworthy, technically thorough and serious. In practice that means a calm basemap, square panels floating over the map, two typefaces with clear jobs, and data colours kept apart from interface colours. The reference is the Blue Lagoon website: a DIN-style sans, charcoal text instead of black, square corners and soft wide shadows. Panels are neutral grey (changed from a pale blue-grey on 2026-11-26), so the only colour on screen is data or the selection yellow.
 
 ## Colour
 
@@ -9,15 +9,16 @@ The atlas should feel robust, trustworthy, technically thorough and serious. In 
 | `--ink` | `#454647` | Body text, icons, the outlines in Context |
 | `--ink-muted` | `#454647` at 70% | Secondary text, field names, axis labels |
 | `--paper` | `#FFFFFF` | Inputs, inspect values, page background outside the map |
-| `--panel` | `#E5EDF1` at 85% opacity | Floating panels |
-| `--line` | `#96C2DB` | Panel borders (1 px), dividers, focus rings |
+| `--panel` | `#F2F2F2` at 85% opacity | Floating panels |
+| `--line` | `#D2D2D2` | Panel borders (1 px), dividers, unselected buttons |
 | `--accent` | `#FFCC00` | Selected feature, active layer marker, swipe divider. Nothing else |
 
 Rules:
 
 - Pure black is never used.
 - Yellow is reserved for "this is what you picked". It never fills an area larger than a marker or a line.
-- Data ramps stay clear of the blue-grey and the yellow, so interface colour never reads as data.
+- Data ramps stay clear of the yellow, and the interface stays grey, so interface colour never reads as data.
+- Focus rings are 2 px `--ink`: `--line` is too light to show focus.
 
 ### Data ramps
 
@@ -25,9 +26,9 @@ Ramps belong to the group, not the layer (`bogota-pop` ADR-0013). Values are pro
 
 | Group | Kind | Ramp |
 | --- | --- | --- |
-| `poblacion` | sequential | Pale peach to oxblood (`#FDE5D2` → `#7A1F1F`), 5–7 classes |
-| `red_vial` | sequential | Light lilac to deep violet (`#E3DDF0` → `#3B1F66`); line width also grows with the value |
-| any | categorical | A fixed set of 8 muted hues without blue-grey or yellow; more categories fall back to `--ink-muted` |
+| `poblacion` | sequential | Pale peach to oxblood (`#DBAD9D` → `#7A1F1F`; light end raised from `#FDE5D2` to clear 2:1 on white), 5–7 classes |
+| `red_vial` | sequential | Spectral, cold (low) to warm (high), 12 quantile classes from the producer's breaks; lightness capped so every class clears 2:1 on white; one line width, higher values drawn on top. **Provisional** (2026-11-26): accepted for now, to review |
+| any | categorical | A fixed set of 8 muted hues without yellow; more categories fall back to `--ink-muted` |
 | `context` | outline | `--ink`, 1.25 px; `dash: true` uses a 2 px dash and 2 px gap |
 
 No data: hatched in `--ink-muted` at low opacity, never left blank and never shown as zero. The main case so far is blocks with dwellings but 0 persons in the census, which have no explanation yet. Showing them openly is part of being trustworthy. (`DATO_ANM` is not an anonymisation flag: it names the level a block's data is published at, and it is `MANZANA` for every Bogotá block.)
@@ -59,8 +60,8 @@ Desktop (≥ 1024 px):
 | Position | Contents |
 | --- | --- |
 | Top left | Site title, mode (Mapa / Etapas), ES·EN switch |
-| Left | Layer panel, grouped: Población, Red vial, Contexto |
-| Right | Inspect panel, opened by a click; layer information panel, opened from the layer's "i" |
+| Left | Inspect panel, opened by a click; layer information panel, opened from the layer's "i" |
+| Top right | Layer panel, grouped: Población, Red vial, Contexto. One data layer at a time (a metric with several radii is one entry, radius chosen below it); Contexto outlines are overlays. One opacity control and a map-labels switch at the bottom |
 | Bottom left | Legend for visible layers, scale bar |
 | Bottom right | Attribution, zoom controls |
 

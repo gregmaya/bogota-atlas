@@ -7,17 +7,19 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "node scripts/fetch-data.mjs --fixture && vite",
+    "build": "node --env-file-if-exists=.env.local scripts/guard-build.mjs && tsc -b && vite build",
     "preview": "vite preview",
     "lint": "oxlint && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "fetch-data": "node scripts/fetch-data.mjs",
-    "fetch-data:local": "node scripts/fetch-data.mjs --local",
+    "fetch-data:local": "node scripts/fetch-data.mjs --local-basemap",
     "check-budget": "node scripts/check-budget.mjs",
-    "check-etapas": "node scripts/check-etapas.ts"
+    "check-etapas": "node scripts/check-etapas.ts",
+    "dev:local": "node --env-file-if-exists=.env.local scripts/fetch-data.mjs --local && vite",
+    "dev:release": "node scripts/fetch-data.mjs && vite"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",

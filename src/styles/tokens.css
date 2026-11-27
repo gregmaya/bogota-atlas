@@ -8,9 +8,9 @@
   --ink: #454647; /* never pure black */
   --ink-muted: rgb(69 70 71 / 70%);
   --paper: #ffffff;
-  --panel: rgb(229 237 241 / 85%);
-  --panel-solid: rgb(229 237 241 / 95%); /* no backdrop-filter support */
-  --line: #96c2db;
+  --panel: rgb(242 242 242 / 85%);
+  --panel-solid: rgb(242 242 242 / 95%); /* no backdrop-filter support */
+  --line: #d2d2d2;
   --accent: #ffcc00; /* only "this is what you picked" */
 
   /* Type */

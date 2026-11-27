@@ -95,14 +95,14 @@ Closed 2026-11-23. The schema fills gaps in ADR-0013 that bogota-pop still has t
 
 Goal: any layer listed in an `etapas.json` appears on the map with no new code.
 
-- [ ] Load one or more `etapas.json` files, key layers as `producer/id`, sort them into groups
+- [x] Load one or more `etapas.json` files, key layers as `producer/id`, sort them into groups
 - [ ] Draw the three style kinds (`sequential`, `categorical`, `outline` with `dash`), using the ramp that belongs to each group (style.md)
-- [ ] Layer panel by group, with visibility and opacity; legend generated from the style hint and `unit`
+- [ ] Layer panel by group, with visibility and opacity; legend generated from the style hint and `unit`. Panel done 2026-11-26: top right, one data layer at a time, series with a radius picker, one opacity control, map-labels switch. Legend still to do
 - [ ] Information panel per layer: description, method, review text (Etapas only), sources, vigencia, licence, producer commit
 - [ ] Inspect panel on click: the fields kept in the tiles, with the unit and field name as published
 - [ ] ES/EN switch from two dictionaries (`src/i18n/es.json`, `en.json`); CI fails if their keys differ
 - [ ] URL state: view, layers, language, compare
-- [ ] Local mode against the producers' `data/processed/etapas/`
+- [x] Local mode against the producers' `data/processed/etapas/`
 
 **Exit gate:** every layer in the fixture renders and inspects in both languages; adding a layer to the fixture needs no code change.
 
@@ -139,7 +139,14 @@ Tied to `bogota-pop` release `v0.1` (MVP model).
 
 - Charts in panels with Observable Plot, wrapped in one React component. Each panel keeps a slot for one, so nothing needs reworking later.
 - Year slider once two population releases exist; scenario layers after `bogota-pop` Phase 5.
+- **Layer by zoom** (raised 2026-11-26). A setting that switches the active layer as the user zooms, e.g. a 5000 m radius when the whole city is in view and 800 m close in. Needs a rule for which layer belongs to which zoom range: from the producer (a zoom range per series member) or chosen in the atlas. Note only; not planned yet.
 - Map labels in Barlow, which would need glyph files generated for MapLibre. Labels use the Protomaps Noto Sans glyphs until then.
+
+## Open questions
+
+- **Class breaks for scenario comparisons** (raised 2026-11-24). Sequential layers start with breaks the producer computes per layer (12 quantiles for bogota-syntax measures). Quantiles differ from layer to layer, so the same colour can mean different values in two scenarios. Comparing scenarios (bogota-pop Phase 5, swipe compare) needs a rule first: shared breaks across a set of layers, fixed thresholds, or a difference layer. To settle with both producers before scenario layers arrive.
+
+- **Spectral for the spatial network** (2026-11-26). Accepted for now, to review. Known limits: the middle classes (green to amber) look alike to red-green colour-blind readers, and amber sits near the selection yellow.
 
 ## Risks
 

@@ -184,6 +184,20 @@ describe('checkEtapas rejects', () => {
     )
   })
 
+  it('breaks on a layer that is not sequential', () => {
+    const data = structuredClone(load('bogota-syntax'))
+    const categorical = data.layers.find((l) => l.id === 'tipo_via')!
+    ;(categorical.style as { breaks?: number[] }).breaks = [1, 2]
+    rejects(data, /kind must be equal to constant/)
+  })
+
+  it('breaks that are not ascending', () => {
+    rejects(
+      withLayer((l) => ((l.style as { breaks?: number[] }).breaks = [0, 10, 10, 5])),
+      /style.breaks must be strictly ascending/,
+    )
+  })
+
   it('a private layer in a release build, but not in local mode', () => {
     const data = withLayer((l) => (l.public = false))
     expect(checkEtapas(data)).toEqual([])
