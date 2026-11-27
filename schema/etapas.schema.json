@@ -155,19 +155,43 @@
             },
             "dash": {
               "type": "boolean"
-            }
-          },
-          "description": "dash: true is only allowed with kind outline.",
-          "if": {
-            "required": ["dash"]
-          },
-          "then": {
-            "properties": {
-              "kind": {
-                "const": "outline"
+            },
+            "breaks": {
+              "description": "Optional, sequential only: ascending values where each colour class starts, computed by the producer on the full data (docs/contract-notes.md item 5). Without it the atlas uses 5 even steps between the file's min and max.",
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "number"
               }
             }
-          }
+          },
+          "description": "dash: true only with kind outline; breaks only with kind sequential.",
+          "allOf": [
+            {
+              "if": {
+                "required": ["dash"]
+              },
+              "then": {
+                "properties": {
+                  "kind": {
+                    "const": "outline"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "required": ["breaks"]
+              },
+              "then": {
+                "properties": {
+                  "kind": {
+                    "const": "sequential"
+                  }
+                }
+              }
+            }
+          ]
         },
         "unit": {
           "$ref": "#/$defs/text"
@@ -238,6 +262,42 @@
           "description": "Attribution text from the sources' licences, as published (not translated).",
           "type": "string",
           "minLength": 1
+        },
+        "series": {
+          "description": "Optional: layers sharing a series id are one entry in the atlas panel (e.g. a measure at several radii). Proposed 2026-11-26 (docs/contract-notes.md item 6).",
+          "type": "object",
+          "required": ["id", "title"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/snake_case"
+            },
+            "title": {
+              "$ref": "#/$defs/text"
+            }
+          }
+        },
+        "parameter": {
+          "description": "Optional, required with series: what tells the layers of a series apart, e.g. radius 800 m.",
+          "type": "object",
+          "required": ["label", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "label": {
+              "$ref": "#/$defs/text"
+            },
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "subtitle": {
+          "description": "Optional short context line under the title, e.g. which network version.",
+          "$ref": "#/$defs/text"
         }
       },
       "allOf": [
@@ -279,6 +339,24 @@
           },
           "else": {
             "required": ["unit"]
+          }
+        },
+        {
+          "description": "series and parameter go together.",
+          "if": {
+            "required": ["series"]
+          },
+          "then": {
+            "required": ["parameter"]
+          }
+        },
+        {
+          "description": "parameter only within a series.",
+          "if": {
+            "required": ["parameter"]
+          },
+          "then": {
+            "required": ["series"]
           }
         }
       ]

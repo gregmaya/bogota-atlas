@@ -24,7 +24,10 @@ interface Layer {
   id: string
   public: boolean
   fields: string[]
-  style: { field: string }
+  style: { field: string; breaks?: number[] }
+  group: string
+  series?: { id: string; title: { es: string; en: string } }
+  parameter?: { value: number; unit?: string }
   sources: string[]
   minzoom: number
   maxzoom: number
@@ -59,12 +62,33 @@ export function checkEtapas(data: unknown, { release = false } = {}): string[] {
     if (!sameSet(layer.sources, Object.keys(layer.vigencia))) {
       errors.push(`${at} vigencia must list exactly the sources`)
     }
+    const breaks = layer.style.breaks
+    if (breaks && breaks.some((b, j) => j > 0 && b <= breaks[j - 1])) {
+      errors.push(`${at} style.breaks must be strictly ascending`)
+    }
     if (layer.minzoom > layer.maxzoom) errors.push(`${at} minzoom is above maxzoom`)
     const [west, south, east, north] = layer.bounds
     if (west >= east || south >= north)
       errors.push(`${at} bounds are not [west, south, east, north]`)
     if (release && !layer.public) errors.push(`${at} is private (public: false) in a release build`)
   })
+  // Layers of one series: same group, same title and unit, distinct values.
+  const series = new Map<string, Layer[]>()
+  for (const layer of layers) {
+    if (layer.series) series.set(layer.series.id, [...(series.get(layer.series.id) ?? []), layer])
+  }
+  for (const [id, members] of series) {
+    const [first] = members
+    const same = (pick: (l: Layer) => unknown) =>
+      members.every((l) => JSON.stringify(pick(l)) === JSON.stringify(pick(first)))
+    if (!same((l) => l.group)) errors.push(`series ${id} mixes groups`)
+    if (!same((l) => l.series?.title)) errors.push(`series ${id} has different titles`)
+    if (!same((l) => l.parameter?.unit)) errors.push(`series ${id} has different parameter units`)
+    const values = members.map((l) => l.parameter?.value)
+    if (new Set(values).size !== values.length) {
+      errors.push(`series ${id} repeats a parameter value`)
+    }
+  }
   return errors
 }
 
